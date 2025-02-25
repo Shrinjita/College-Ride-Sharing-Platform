@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prior Planned Pool Booking System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #3b5998;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px;
+        }
+        .sidebar {
+            width: 30%;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .table-container {
+            width: 65%;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        select, input, button {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        .emergency-btn {
+            background-color: red;
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            margin: 10px 0;
+            display: inline-block;
+            width: 100%;
+        }
+        .chat-btn {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            cursor: pointer;
+            margin: 10px 0;
+            display: inline-block;
+            width: 100%;
+        }
+        .radio-btn {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Prior Planned Pool Booking System</h1>
+        <p>Affordable and convenient pooling options for SRMIST students</p>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar/Booking Panel -->
+        <div class="sidebar">
+            <h3>Book Your Pool Ride</h3>
+            <label for="pickup-location">Pickup Location:</label>
+            <select id="pickup-location">
+                <option>SRM ARCH GATE</option>
+                <option>VALLIAMAI</option>
+                <option>ESTANCIA</option>
+                <option>ABODE</option>
+                <option>VGN</option>
+                <option>AKSHAYA SFA</option>
+                <option>AKSHAYA MM</option>
+                <option>GST</option>
+                <option>POTHERI STATIONS</option>
+                <option>MAIN CAMPUS</option>
+            </select>
+
+            <label for="drop-location">Drop Location:</label>
+            <select id="drop-location">
+                <option>SRM ARCH GATE</option>
+                <option>VALLIAMAI</option>
+                <option>ESTANCIA</option>
+                <option>ABODE</option>
+                <option>VGN</option>
+                <option>AKSHAYA SFA</option>
+                <option>AKSHAYA MM</option>
+                <option>GST</option>
+                <option>POTHERI STATIONS</option>
+                <option>MAIN CAMPUS</option>
+            </select>
+
+            <label for="gender-preference">Gender Preference:</label>
+            <div class="radio-btn">
+                <input type="radio" id="all-girls" name="gender" value="all-girls">
+                <label for="all-girls">All Girls</label>
+            </div>
+            <div class="radio-btn">
+                <input type="radio" id="all-boys" name="gender" value="all-boys">
+                <label for="all-boys">All Boys</label>
+            </div>
+            <div class="radio-btn">
+                <input type="radio" id="no-preference" name="gender" value="no-preference" checked>
+                <label for="no-preference">No Preference</label>
+            </div>
+
+            <label for="vehicle">Vehicle Choice:</label>
+            <select id="vehicle">
+                <option value="bike">Bike</option>
+                <option value="scooter">Scooter</option>
+                <option value="cab">Cab</option>
+            </select>
+
+            <label for="special-request">Special Request (Optional):</label>
+            <input type="text" id="special-request" placeholder="e.g., Quiet ride, Luggage">
+
+            <label for="time">Preferred Time:</label>
+            <input type="time" id="time">
+
+            <button id="book-btn">Find Poolers</button>
+            <button class="emergency-btn" id="emergency-btn">Emergency 112 Call</button>
+        </div>
+
+        <!-- Poolers Table/Log -->
+        <div class="table-container">
+            <h3>Available Poolers</h3>
+            <table id="poolers-table">
+                <thead>
+                    <tr>
+                        <th>Pickup Location</th>
+                        <th>Drop Location</th>
+                        <th>Waiting Time</th>
+                        <th>Vehicle Choice</th>
+                        <th>Request</th>
+                        <th>Gender Preference</th>
+                        <th>Chat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Chatbox Modal -->
+    <div id="chatbox-modal" style="display:none;">
+        <div style="position: fixed; bottom: 20px; right: 20px; background: #fff; border: 2px solid #ddd; padding: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.2); width: 250px;">
+            <h4>Chat with Pooler</h4>
+            <div id="chat-content" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;">
+                <!-- Chat messages will appear here -->
+            </div>
+            <input type="text" id="chat-input" placeholder="Type a message..." style="width: 100%; padding: 8px;">
+            <button onclick="sendMessage()">Send</button>
+            <button onclick="closeChat()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Function to handle booking form submission and add data to the poolers table
+        document.getElementById('book-btn').addEventListener('click', function() {
+            let pickupLocation = document.getElementById('pickup-location').value;
+            let dropLocation = document.getElementById('drop-location').value;
+            let genderPreference = document.querySelector('input[name="gender"]:checked').value;
+            let vehicleChoice = document.getElementById('vehicle').value;
+            let specialRequest = document.getElementById('special-request').value;
+            let preferredTime = document.getElementById('time').value;
+            let waitingTime = '10 mins';  // Default value
+
+            // Create a new row in the table
+            let table = document.getElementById('poolers-table').getElementsByTagName('tbody')[0];
+            let newRow = table.insertRow(table.rows.length);
+
+            newRow.innerHTML = `
+                <td>${pickupLocation}</td>
+                <td>${dropLocation}</td>
+                <td>${waitingTime}</td>
+                <td>${vehicleChoice}</td>
+                <td>${specialRequest}</td>
+                <td>${genderPreference}</td>
+                <td><button class="chat-btn" onclick="openChat()">Chat Now</button></td>
+            `;
+        });
+
+        // Function to open the chatbox
+        function openChat() {
+            document.getElementById('chatbox-modal').style.display = 'block';
+        }
+
+        // Function to send a message in the chatbox
+        function sendMessage() {
+            let chatContent = document.getElementById('chat-content');
+            let message = document.getElementById('chat-input').value;
+            if (message.trim() !== '') {
+                let newMessage = document.createElement('div');
+                newMessage.textContent = message;
+                chatContent.appendChild(newMessage);
+                document.getElementById('chat-input').value = '';
+                chatContent.scrollTop = chatContent.scrollHeight;
+            }
+        }
+
+        // Function to close the chatbox
+        function closeChat() {
+            document.getElementById('chatbox-modal').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>
