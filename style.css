@@ -6,7 +6,7 @@
     font-family: 'Arial', sans-serif;
 }
 body {
-    background: linear-gradient(135deg, #2d63c8, #1b2b5f);
+    background: linear-gradient(to bottom, #8923dc, #d848ff);
     color: white;
     text-align: center;
     padding-bottom: 60px;
@@ -73,7 +73,7 @@ header {
 .modal-container button {
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
+    background-color: #784cd0;
     color: white;
     border: none;
     border-radius: 5px;
@@ -383,7 +383,7 @@ p {
 /* Footer Links */
 .footer-links {
     padding: 10px;
-    background-color: rgb(8, 67, 185);
+    background-color: rgba(152, 8, 185, 0.713);
 }
 
 .footer-links nav {

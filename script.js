@@ -21,43 +21,63 @@ function toggleRegister() {
     modal.style.display = (modal.style.display === "none" || modal.style.display === "") ? "block" : "none";
 }
 
-// Function to handle Sign-In
+// 🚀 Modify Sign-In Function to Redirect Admin
 function signIn() {
-    let username = document.getElementById("signInUsername").value;
-    let password = document.getElementById("signInPassword").value;
+    let username = document.getElementById("signInUsername").value.trim();
+    let password = document.getElementById("signInPassword").value.trim();
 
-    if (username === "admin" && password === "password") { // Replace with actual database check
-        alert("Login successful!");
-        toggleSignIn();
+    let storedUser = localStorage.getItem(username);
+
+    if (storedUser) {
+        let userData = JSON.parse(storedUser);
+        let storedPassword = userData.password;
+
+        if (password === storedPassword) {
+            alert("Login successful!");
+            toggleSignIn();
+
+            // 🚀 Redirect Admin
+            if (userData.registerNo === "RA2211047010017") {
+                window.location.href = "admin.html";
+            }
+        } else {
+            alert("Incorrect password.");
+        }
     } else {
-        alert("Invalid credentials. Please try again.");
+        alert("Username not found. Please Register.");
     }
 }
 
-// Function to verify Register Number
+// 🚀 Function to verify Register Number
 function verifyRegisterNo() {
-    let registerNo = document.getElementById("registerNumber").value;
-    let validRegisterNos = ["2023001", "2023002", "2023003"]; // Replace with actual database check
+    let registerNo = document.getElementById("registerNumber").value.trim();
 
-    if (validRegisterNos.includes(registerNo)) {
-        document.getElementById("registerFields").style.display = "block";
-    } else {
+    if (!registerNo.startsWith("RA2211047010") || parseInt(registerNo.slice(-4)) < 1 || parseInt(registerNo.slice(-4)) > 50) {
         alert("Invalid Register Number!");
+        return;
     }
+
+    alert("Register Number Verified! Please set your Username and Password.");
+    document.getElementById("registerFields").style.display = "block"; // Show Username & Password Fields
 }
 
-// Function to register user
+// 🚀 Function to register user after verification
 function registerUser() {
-    let username = document.getElementById("registerUsername").value;
-    let password = document.getElementById("registerPassword").value;
+    let username = document.getElementById("registerUsername").value.trim();
+    let password = document.getElementById("registerPassword").value.trim();
+    let registerNo = document.getElementById("registerNumber").value.trim();
 
-    if (username && password) {
-        alert("Registration successful! You can now sign in.");
-        toggleRegister();
-    } else {
-        alert("Please fill in all fields.");
+    if (!username || !password) {
+        alert("Please enter both Username and Password.");
+        return;
     }
+
+    localStorage.setItem(username, JSON.stringify({ registerNo, password }));
+    alert("Registration successful! You can now sign in.");
+    toggleRegister();
 }
+
+
 document.addEventListener("DOMContentLoaded", function () {
     // Function to show/hide manual input field when "Other" is selected
     function toggleCustomInput(type) {
