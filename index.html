@@ -3,17 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Illustrious Ride Sharing - Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>College Ride Pooling Platform</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<body>
 
-    <div class="bg-white p-6 rounded-lg shadow-lg text-center w-96">
-        <h1 class="text-2xl font-bold mb-4">Illustrious Ride Sharing</h1>
-        <input type="text" placeholder="Username" class="w-full border p-2 mb-2">
-        <input type="password" placeholder="Password" class="w-full border p-2 mb-2">
-        <button onclick="location.href='main.html'" class="w-full bg-blue-500 text-white py-2 mt-2 rounded">Login</button>
+    <header>
+        <div class="logo">College Ride Pooling Platform</div>
+        <div class="auth-buttons">
+            <button class="sign-in" onclick="window.location.href='login.html'">Sign in</button>
+            <button class="register" onclick="window.location.href='login.html'">Register</button>
+        </div>
+    </header>
+    <section class="section">
+        <h1>Explore New Rides</h1>
+        <p>Seamless ride-sharing with modern design and effortless user experience.</p>
+        <div class="search-box">
+            <div class="input">
+                <label>Pickup Location</label>
+                <input type="text" id="pickup" placeholder="Enter pickup location">
+            </div>
+            <div class="input">
+                <label>Drop Location</label>
+                <input type="text" id="drop" placeholder="Enter drop location">
+            </div>
+            <div class="input">
+                <label>Gender Sort</label>
+                <select id="gender">
+                    <option value="any">Any</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            <button class="search-btn" onclick="addRecord()">Search</button>
+        </div>
+    </section>
+
+    
+<!-- Floating SOS and Chatroom Buttons -->
+<div class="floating-buttons">
+    <button class="sos-btn" onclick="toggleSOS()">SOS</button>
+</div>
+
+<!-- SOS Container (Initially Hidden) -->
+<div id="sosModal" class="sos-container">
+    <h2>Emergency SOS Activated</h2>
+    <p>Help is on the way.</p>
+    <button onclick="toggleSOS()">Close</button>
+</div>
+
+
+    <!-- Chatroom Floating Button -->
+<button class="chat-btn" onclick="toggleChatroom()">💬</button>
     </div>
 
+
+<!-- Chatroom Container -->
+<div class="chat-container" id="chatroom">
+    <div class="chat-header">
+        <span>Chatroom</span>
+        <button class="close-chat" onclick="toggleChatroom()">✖</button>
+    </div>
+    <div class="chat-messages"></div>
+    <div class="chat-input">
+        <input type="text" id="chatMessage" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+
+    <script src="script.js"></script>
 </body>
+<footer id="footer">
+    <!-- Stats Section (Above Footer Links) -->
+    <section class="stats-section">
+        <div class="stats">
+            <div class="stat">
+                <strong>✔</strong>
+                <p>Satisfied customers</p>
+            </div>
+            <div class="stat">
+                <strong>✔</strong>
+                <p>Safe journey</p>
+            </div>
+            <div class="stat">
+                <strong>_</strong>
+                <p>Tours available</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Links Section -->
+    <section class="footer-links">
+        <nav>
+            <a href="#">GitHub</a>
+            <a href="#">Contact Us</a>
+            <a href="#">About Us</a>
+        </nav>
+    </section>
+</footer>
+
 </html>
