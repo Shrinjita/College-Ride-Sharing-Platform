@@ -82,15 +82,31 @@ header {
 .modal-container button:hover {
     background-color: #0056b3;
 }
-
-/* === CLOSE BUTTON === */
-.close-btn {
+/* Modal Close Button */
+.modal-close-btn {
     position: absolute;
     top: 10px;
-    right: 15px;
+    right: 10px;
+    background: red;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 20px;
-    color: red;
+}
+
+/* Ensure modal container is relative */
+.modal {
+    position: relative;
+    width: 400px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
 }
 
 /* === HERO SECTION === */
@@ -335,6 +351,7 @@ p {
     font-size: 16px;
     margin-bottom: 15px;
 }
+/* === CLOSE BUTTON === */
 .close-btn {
     background: red;
     color: white;
@@ -361,39 +378,6 @@ p {
     color: white;
     text-align: center;
     font-size: 14px;
-}
-
-/* Stats Section */
-.stats-section {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 20px 0;
-}
-
-/* Stats Container */
-.stats {
-    display: flex;
-    justify-content: center;
-    gap: 50px;
-    width: 80%;
-    margin: 0 auto;
-    text-align: center;
-}
-
-/* Individual Stat */
-.stat {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-/* Stat Icons */
-.stat strong {
-    font-size: 28px;
-    display: block;
-    color: #2ecc71;
 }
 
 /* Footer Links */
