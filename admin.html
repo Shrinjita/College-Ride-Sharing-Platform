@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .dashboard-container {
+            width: 100%;
+            max-width: 600px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e6f7ff;
+            border-left: 5px solid #0078ff;
+        }
+        .alert-item, .user-item {
+            display: flex;
+            justify-content: space-between;
+            background-color: #fff3cd;
+            border-left: 5px solid #ffa502;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        .status-ok {
+            background-color: #d4edda;
+            border-left: 5px solid #28a745;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h2>Admin Dashboard</h2>
+        
+        <div class="section">
+            <h3>User Security Verification</h3>
+            <div id="userStatus"></div>
+        </div>
+
+        <div class="section">
+            <h3>SOS Alerts</h3>
+            <div id="sosAlerts"></div>
+        </div>
+
+        <div class="section">
+            <h3>Chatroom Status</h3>
+            <div id="chatroomStatus" class="status-ok">Chatroom is Active</div>
+        </div>
+    </div>
+
+    <script>
+        const users = [
+            { name: "John Doe", verified: true },
+            { name: "Jane Smith", verified: false },
+            { name: "Alice Johnson", verified: true }
+        ];
+
+        const alerts = [
+            "SOS Alert: Emergency at Building A",
+            "SOS Alert: Fire detected in Hall 2"
+        ];
+
+        function renderUserStatus() {
+            const userStatusDiv = document.getElementById('userStatus');
+            users.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = `user-item ${user.verified ? 'status-ok' : 'status-error'}`;
+                userItem.innerText = `${user.name} - ${user.verified ? 'Verified' : 'Not Verified'}`;
+                userStatusDiv.appendChild(userItem);
+            });
+        }
+
+        function renderSOSAlerts() {
+            const sosAlertDiv = document.getElementById('sosAlerts');
+            alerts.forEach(alert => {
+                const alertItem = document.createElement('div');
+                alertItem.className = 'alert-item';
+                alertItem.innerText = alert;
+                sosAlertDiv.appendChild(alertItem);
+            });
+        }
+
+        function updateChatroomStatus() {
+            const chatroomDiv = document.getElementById('chatroomStatus');
+            const isChatroomActive = Math.random() > 0.2; // Simulate chatroom status (80% uptime)
+            chatroomDiv.className = isChatroomActive ? 'status-ok' : 'status-error';
+            chatroomDiv.innerText = isChatroomActive ? 'Chatroom is Active' : 'Chatroom is Down';
+        }
+
+        // Render content on load
+        renderUserStatus();
+        renderSOSAlerts();
+        updateChatroomStatus();
+
+        // Simulate chatroom status update every 10 seconds
+        setInterval(updateChatroomStatus, 10000);
+    </script>
+</body>
+</html>
