@@ -1,62 +1,60 @@
+// Toggle Chatroom
 function toggleChatroom() {
-    let chatroom = document.getElementById("chatroom");
+    let chatroom = document.querySelector(".chat-container");
     chatroom.style.display = (chatroom.style.display === "none" || chatroom.style.display === "") ? "block" : "none";
 }
 
-function sendMessage() {
-    let input = document.getElementById("chatMessage");
-    let messageText = input.value.trim();
-    
-    if (messageText !== "") {
-        let messagesContainer = document.querySelector(".chat-messages");
-        let newMessage = document.createElement("div");
-
-        newMessage.classList.add("message", "sent"); // Add sent message class
-        newMessage.textContent = messageText;
-
-        messagesContainer.appendChild(newMessage);
-        input.value = "";
-
-        // Auto-scroll to the latest message
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-        // Simulate received message after 1 second (for testing UI)
-        setTimeout(receiveMessage, 1000);
-    }
-}
-
-// Simulating an incoming message
-function receiveMessage() {
-    let messagesContainer = document.querySelector(".chat-messages");
-    let newMessage = document.createElement("div");
-
-    newMessage.classList.add("message", "received"); // Add received message class
-    newMessage.textContent = "This is an automated reply.";
-
-    messagesContainer.appendChild(newMessage);
-
-    // Auto-scroll to the latest message
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-}
-
-function addRecord() {
-    let pickup = document.getElementById("pickup").value;
-    let drop = document.getElementById("drop").value;
-    let gender = document.getElementById("gender").value;
-    
-    if (pickup === "" || drop === "") {
-        alert("Please enter both pickup and drop locations.");
-        return;
-    }
-    
-    let table = document.getElementById("recordTable");
-    let newRow = table.insertRow();
-    newRow.insertCell(0).textContent = pickup;
-    newRow.insertCell(1).textContent = drop;
-    newRow.insertCell(2).textContent = gender;
-}
-
+// Toggle SOS Modal
 function toggleSOS() {
-    const sosModal = document.getElementById("sosModal");
-    sosModal.classList.toggle("active");
+    let sosModal = document.getElementById("sosModal");
+    sosModal.style.display = (sosModal.style.display === "none" || sosModal.style.display === "") ? "block" : "none";
+}
+// Function to toggle Sign-In modal
+function toggleSignIn() {
+    let modal = document.getElementById("signInModal");
+    modal.style.display = (modal.style.display === "none" || modal.style.display === "") ? "block" : "none";
+}
+
+// Function to toggle Register modal
+function toggleRegister() {
+    let modal = document.getElementById("registerModal");
+    modal.style.display = (modal.style.display === "none" || modal.style.display === "") ? "block" : "none";
+}
+
+// Function to handle Sign-In
+function signIn() {
+    let username = document.getElementById("signInUsername").value;
+    let password = document.getElementById("signInPassword").value;
+
+    if (username === "admin" && password === "password") { // Replace with actual database check
+        alert("Login successful!");
+        toggleSignIn();
+    } else {
+        alert("Invalid credentials. Please try again.");
+    }
+}
+
+// Function to verify Register Number
+function verifyRegisterNo() {
+    let registerNo = document.getElementById("registerNumber").value;
+    let validRegisterNos = ["2023001", "2023002", "2023003"]; // Replace with actual database check
+
+    if (validRegisterNos.includes(registerNo)) {
+        document.getElementById("registerFields").style.display = "block";
+    } else {
+        alert("Invalid Register Number!");
+    }
+}
+
+// Function to register user
+function registerUser() {
+    let username = document.getElementById("registerUsername").value;
+    let password = document.getElementById("registerPassword").value;
+
+    if (username && password) {
+        alert("Registration successful! You can now sign in.");
+        toggleRegister();
+    } else {
+        alert("Please fill in all fields.");
+    }
 }

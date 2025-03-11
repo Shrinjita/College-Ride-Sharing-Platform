@@ -1,10 +1,10 @@
+/* === GLOBAL STYLES === */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Arial', sans-serif;
 }
-
 body {
     background: linear-gradient(135deg, #2d63c8, #1b2b5f);
     color: white;
@@ -12,58 +12,103 @@ body {
     padding-bottom: 60px;
 }
 
+/* === HEADER === */
 header {
     display: flex;
     justify-content: space-between;
     padding: 20px;
     align-items: center;
 }
-
 .logo {
     font-size: 24px;
     font-weight: bold;
 }
-
-nav a {
-    color: white;
-    margin: 0 15px;
-    text-decoration: none;
-    font-weight: 500;
-}
-
 .auth-buttons {
     display: flex;
     gap: 10px;
 }
-
 .sign-in, .register {
     padding: 10px 20px;
     border: none;
     cursor: pointer;
 }
-
 .register {
     background: #27ae60;
     color: white;
     border-radius: 5px;
 }
+/* === MODAL CONTAINERS === */
+.modal-container {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    width: 320px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    z-index: 1000;
+}
 
+/* === MODAL CONTENT === */
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* === INPUT FIELDS === */
+.modal-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* === BUTTONS === */
+.modal-container button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.modal-container button:hover {
+    background-color: #0056b3;
+}
+
+/* === CLOSE BUTTON === */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    font-size: 20px;
+    color: red;
+}
+
+/* === HERO SECTION === */
 .hero {
     margin-top: 50px;
     padding: 20px;
 }
-
 h1 {
     font-size: 40px;
     font-weight: bold;
 }
-
 p {
     margin-top: 10px;
     font-size: 18px;
     opacity: 0.8;
 }
 
+/* === SEARCH BOX === */
 .search-box {
     display: flex;
     justify-content: center;
@@ -72,23 +117,19 @@ p {
     padding: 15px;
     border-radius: 10px;
 }
-
 .input {
     margin: 0 10px;
 }
-
 .input label {
     display: block;
     font-size: 14px;
 }
-
-.input input, .input select {
+.input input {
     padding: 8px;
     border: none;
     border-radius: 5px;
     text-align: center;
 }
-
 .search-btn {
     background: #2ecc71;
     color: white;
@@ -97,47 +138,87 @@ p {
     border-radius: 5px;
     cursor: pointer;
 }
+/* Align Table with Search Box */
+.table-container {
+    width: 80%;  /* Same width as search-box */
+    margin: 20px auto;  /* Center it and add spacing */
+    text-align: center;
+}
 
-/* Floating Buttons */
+/* Table Styling */
+.ride-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Header */
+.ride-table th {
+    background-color: #f4f4f4;
+    color: black;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Table Rows */
+.ride-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    color: black;
+    text-align: center;
+}
+
+/* Alternate Row Styling */
+.ride-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Hover Effect */
+.ride-table tr:hover {
+    background-color: #e0e0e0;
+}
+
+/* === FLOATING BUTTONS === */
 .floating-buttons {
     position: fixed;
-    bottom: 20px; /* Adjusted to keep buttons closer to the bottom */
+    bottom: 20px;
     right: 20px;
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Added space between buttons */
+    gap: 10px;
     z-index: 1000;
 }
-
-/* SOS and Chat Buttons */
 .sos-btn, .chat-btn {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: white;
     border: none;
-    padding: 12px 20px;
     font-size: 16px;
     font-weight: bold;
-    border-radius: 50px;
+    border-radius: 50%;
     cursor: pointer;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s ease-in-out;
 }
-
 .sos-btn {
     background: red;
 }
-
 .chat-btn {
     background: #2ecc71;
 }
-
-/* Hover Effect */
 .sos-btn:hover, .chat-btn:hover {
     transform: scale(1.1);
 }
-
-
-/* Chatroom and SOS Containers */
-.chat-container, .sos-container {
+/* Chatroom Containers */
+.chat-container {
     display: none;
     position: fixed;
     bottom: 120px;
@@ -227,6 +308,47 @@ p {
     margin-left: 5px;
     border-radius: 5px;
     cursor: pointer;
+}
+/* === SOS MODAL === */
+.sos-container {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    width: 300px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    z-index: 1000;
+    border: 2px solid red;
+}
+.sos-container h2 {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+.sos-container p {
+    color: black;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+.close-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 120px;
+    font-size: 16px;
+    display: inline-block;
+}
+.close-btn:hover {
+    background: darkred;
 }
 
 /* Footer */

@@ -4,78 +4,153 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>College Ride Pooling Platform</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- HEADER -->
     <header>
         <div class="logo">College Ride Pooling Platform</div>
         <div class="auth-buttons">
-            <button class="sign-in" onclick="window.location.href='login.html'">Sign in</button>
-            <button class="register" onclick="window.location.href='login.html'">Register</button>
+            <button class="sign-in" onclick="toggleSignIn()">Sign in</button>
+            <button class="register" onclick="toggleRegister()">Register</button>
         </div>
     </header>
-    <section class="section">
-        <h1>Explore New Rides</h1>
-        <p>Seamless ride-sharing with modern design and effortless user experience.</p>
-        <div class="search-box">
-            <div class="input">
-                <label>Pickup Location</label>
-                <input type="text" id="pickup" placeholder="Enter pickup location">
-            </div>
-            <div class="input">
-                <label>Drop Location</label>
-                <input type="text" id="drop" placeholder="Enter drop location">
-            </div>
-            <div class="input">
-                <label>Gender Sort</label>
-                <select id="gender">
-                    <option value="any">Any</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                </select>
-            </div>
-            <button class="search-btn" onclick="addRecord()">Search</button>
+    <!-- SIGN-IN MODAL -->
+    <div id="signInModal" class="modal-container">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleSignIn()">✖</span>
+            <h2>Sign In</h2>
+            <input type="text" id="signInUsername" placeholder="Username">
+            <input type="password" id="signInPassword" placeholder="Password">
+            <button onclick="signIn()">Login</button>
         </div>
+    </div>
+
+    <!-- REGISTER MODAL -->
+    <div id="registerModal" class="modal-container">
+        <div class="modal-content">
+            <span class="close-btn" onclick="toggleRegister()">✖</span>
+            <h2>Register</h2>
+            <input type="text" id="registerNumber" placeholder="Enter Register No.">
+            <button onclick="verifyRegisterNo()">Verify</button>
+            <div id="registerFields" style="display: none;">
+                <input type="text" id="registerUsername" placeholder="Choose Username">
+                <input type="password" id="registerPassword" placeholder="Set Password">
+                <button onclick="registerUser()">Register</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <h1>College Ride Pooling Platform</h1>
+        <p>Seamless ride-sharing with modern design and effortless user experience.</p>
     </section>
 
-    
-<!-- Floating SOS and Chatroom Buttons -->
-<div class="floating-buttons">
-    <button class="sos-btn" onclick="toggleSOS()">SOS</button>
+    <!-- SEARCH BOX -->
+    <div class="search-box">
+            
+        <!-- Pickup Location Dropdown -->
+        <div class="input">
+            <label for="pickup">Pickup Location</label>
+            <select id="pickup" onchange="toggleCustomInput('pickup')">
+                <option value="" disabled selected>Select Pickup Location</option>
+                <option value="SRM ARCH GATE">SRM ARCH GATE</option>
+                <option value="VALLIAMMAI">VALLIAMMAI</option>
+                <option value="ESTANCIA">ESTANCIA</option>
+                <option value="ABODE">ABODE</option>
+                <option value="VGN">VGN</option>
+                <option value="AKSHAYA SAFAA">AKSHAYA SAFAA</option>
+                <option value="AKSHAYA MM">AKSHAYA MM</option>
+                <option value="GST">GST</option>
+                <option value="POTHERI STATION">POTHERI STATION</option>
+                <option value="MAIN CAMPUS">MAIN CAMPUS</option>
+                <option value="custom">Other (Enter Manually)</option>
+            </select>
+            <input type="text" id="pickupCustom" placeholder="Enter pickup location" style="display: none;">
+        </div>
+
+        <!-- Drop Location Dropdown -->
+        <div class="input">
+            <label for="drop">Drop Location</label>
+            <select id="drop" onchange="toggleCustomInput('drop')">
+                <option value="" disabled selected>Select Drop Location</option>
+                <option value="SRM ARCH GATE">SRM ARCH GATE</option>
+                <option value="VALLIAMMAI">VALLIAMMAI</option>
+                <option value="ESTANCIA">ESTANCIA</option>
+                <option value="ABODE">ABODE</option>
+                <option value="VGN">VGN</option>
+                <option value="AKSHAYA SAFAA">AKSHAYA SAFAA</option>
+                <option value="AKSHAYA MM">AKSHAYA MM</option>
+                <option value="GST">GST</option>
+                <option value="POTHERI STATION">POTHERI STATION</option>
+                <option value="MAIN CAMPUS">MAIN CAMPUS</option>
+                <option value="custom">Other (Enter Manually)</option>
+            </select>
+            <input type="text" id="dropCustom" placeholder="Enter drop location" style="display: none;">
+        </div>
+
+        <!-- Gender Sort -->
+        <div class="input">
+            <label for="gender">Gender Sort</label>
+            <select id="gender">
+                <option value="any">Any</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
+
+        <button class="search-btn" onclick="addRecord()">Add</button>
+    </div>
+<!-- RIDE RECORDS TABLE -->
+<div class="table-container">
+    <table class="ride-table">
+        <thead>
+            <tr>
+                <th>Pickup Location</th>
+                <th>Drop Location</th>
+                <th>Gender</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody id="ridesData">
+            <!-- Dynamic ride data will be added here -->
+        </tbody>
+    </table>
 </div>
 
-<!-- SOS Container (Initially Hidden) -->
-<div id="sosModal" class="sos-container">
-    <h2>Emergency SOS Activated</h2>
-    <p>Help is on the way.</p>
-    <button onclick="toggleSOS()">Close</button>
-</div>
-
-
-    <!-- Chatroom Floating Button -->
-<button class="chat-btn" onclick="toggleChatroom()">💬</button>
+    <!-- FLOATING BUTTONS -->
+    <div class="floating-buttons">
+        <button class="sos-btn" onclick="toggleSOS()">SOS</button>
+        <button class="chat-btn" onclick="toggleChatroom()">💬</button>
     </div>
 
-
-<!-- Chatroom Container -->
-<div class="chat-container" id="chatroom">
-    <div class="chat-header">
-        <span>Chatroom</span>
-        <button class="close-chat" onclick="toggleChatroom()">✖</button>
+    <!-- SOS MODAL -->
+    <div id="sosModal" class="sos-container">
+        <h2>Emergency SOS Activated</h2>
+        <p>Help is on the way.</p>
+        <button class="close-btn" onclick="toggleSOS()">Close</button>
     </div>
-    <div class="chat-messages"></div>
-    <div class="chat-input">
-        <input type="text" id="chatMessage" placeholder="Type your message...">
-        <button onclick="sendMessage()">Send</button>
-    </div>
-</div>
 
+        <!-- Chatroom Container -->
+        <div class="chat-container" id="chatroom">
+            <div class="chat-header">
+                <span>Chatroom</span>
+                <button class="close-chat" onclick="toggleChatroom()">✖</button>
+            </div>
+            <div class="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" id="chatMessage" placeholder="Type your message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
 
     <script src="script.js"></script>
 </body>
 <footer id="footer">
-    <!-- Stats Section (Above Footer Links) -->
+    <!-- Stats Section -->
     <section class="stats-section">
         <div class="stats">
             <div class="stat">
@@ -102,5 +177,4 @@
         </nav>
     </section>
 </footer>
-
 </html>
