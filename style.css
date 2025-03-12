@@ -113,6 +113,7 @@ header {
 .hero {
     margin-top: 50px;
     padding: 30px;
+    text-align: center;
 }
 h1 {
     font-size: 40px;
@@ -127,25 +128,33 @@ p {
 /* === SEARCH BOX === */
 .search-box {
     display: flex;
-    justify-content: center;
-    margin-top: 30px;
+    flex-wrap: wrap; /* Wrap items for smaller screens */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    max-width: 90%; /* Prevent full-width stretch */
+    margin: 30px auto; /* Center with auto margin */
     background: rgba(255, 255, 255, 0.1);
     padding: 15px;
     border-radius: 10px;
 }
+
+/* Ensure inputs and buttons are centered */
 .input {
-    margin: 0 10px;
+    margin: 10px;
+    text-align: center;
 }
 .input label {
     display: block;
     font-size: 14px;
 }
-.input input {
+.input select, .input input {
     padding: 8px;
     border: none;
     border-radius: 5px;
     text-align: center;
 }
+
+/* Style Search Button */
 .search-btn {
     background: #2ecc71;
     color: white;
@@ -154,14 +163,16 @@ p {
     border-radius: 5px;
     cursor: pointer;
 }
-/* Align Table with Search Box */
+
+/* === TABLE STYLING === */
 .table-container {
-    width: 80%;  /* Same width as search-box */
-    margin: 20px auto;  /* Center it and add spacing */
+    width: 90%; /* More responsive */
+    max-width: 600px; /* Limit width */
+    margin: 20px auto; /* Center it */
     text-align: center;
 }
 
-/* Table Styling */
+/* Ride Table */
 .ride-table {
     width: 100%;
     border-collapse: collapse;
@@ -187,6 +198,30 @@ p {
     border-bottom: 1px solid #ddd;
     color: black;
     text-align: center;
+}
+
+/* Alternate Row Styling */
+.ride-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* === MOBILE RESPONSIVENESS === */
+@media screen and (max-width: 768px) {
+    .search-box {
+        flex-direction: column; /* Stack elements */
+        width: 100%;
+        padding: 10px;
+    }
+    
+    .table-container {
+        width: 100%;
+        max-width: none;
+    }
+
+    .ride-table th, .ride-table td {
+        padding: 8px;
+        font-size: 14px;
+    }
 }
 
 /* Alternate Row Styling */
