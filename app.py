@@ -1,13 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+from flask_socketio import SocketIO, send
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Change this to a secure key
+app.secret_key = 'da3f14683aa9d7649dad30081119e823e1b4271cfffe07d8405d5893a0d790ac'  # Change this to a secure key
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # In-memory database (Replace with actual DB in production)
 users = {}
 rides = []
 sos_alerts = []
-
+chat_messages = []  # Store chat messages
 
 # Home Route
 @app.route('/')
@@ -64,11 +66,11 @@ def add_ride():
         "drop": data['drop'],
         "gender": data['gender'],
         "time": data['time'],
-        "user": session['user']
+        "user": session['user'],
+        "contact": users[session['user']]["registerNo"]  # Using registerNo as contact
     }
     rides.append(ride)
     return jsonify({"message": "Ride added successfully"})
-
 
 # Get All Rides
 @app.route('/get_rides')
@@ -82,9 +84,8 @@ def send_sos():
     if 'user' not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
-    sos_alerts.append(session['user'])
-    return jsonify({"message": "SOS Alert Sent"})
-
+    sos_alerts.append({"user": session['user'], "contact": "7439947074"})
+    return jsonify({"message": "SOS Alert Sent", "contact": "7439947074"})
 
 # Admin Dashboard
 @app.route('/admin')
@@ -103,6 +104,11 @@ def admin_data():
 
     return jsonify({"users": users, "rides": rides, "sos_alerts": sos_alerts})
 
+# Chatroom WebSocket Functionality
+@socketio.on("message")
+def handle_message(data):
+    print(f"Received message: {data}")
+    socketio.emit('message', data, broadcast=True)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)
