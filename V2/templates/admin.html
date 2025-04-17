@@ -112,6 +112,29 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+        
+        .call-button {
+            background-color: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .call-button:hover {
+            background-color: #219653;
+        }
+        
+        .actions-table .resolved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .actions-table .pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
     </style>
 </head>
 <body>
@@ -181,76 +204,78 @@
         </select>
     </div>
 
-    <!-- Add Ride Form -->
+    <!-- SOS Alerts Table -->
     <div class="ride-panel">
-        <h3>Add New Ride</h3>
-        <form method="POST" action="/add_ride">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div>
-                    <label for="roll_number">Roll Number:</label>
-                    <input type="text" id="roll_number" name="roll_number" required pattern="RA2211047010\d{3}" title="Format: RA2211047010XXX">
-                </div>
-                
-                <div>
-                    <label for="pickup">Pickup Location:</label>
-                    <select name="pickup" id="pickup" required>
-                        <option value="" disabled selected>Select Pickup</option>
-                        <option value="srm arch gate">SRM Arch Gate</option>
-                        <option value="java">Java</option>
-                        <option value="hospital">Hospital</option>
-                        <option value="abode">Abode</option>
-                        <option value="estancia">Estancia</option>
-                        <option value="akshara">Akshara</option>
-                        <option value="akshaya">Akshaya</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="drop">Drop Location:</label>
-                    <select name="drop" id="drop" required>
-                        <option value="" disabled selected>Select Drop</option>
-                        <option value="srm arch gate">SRM Arch Gate</option>
-                        <option value="java">Java</option>
-                        <option value="hospital">Hospital</option>
-                        <option value="abode">Abode</option>
-                        <option value="estancia">Estancia</option>
-                        <option value="akshara">Akshara</option>
-                        <option value="akshaya">Akshaya</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="time">Time:</label>
-                    <input type="time" id="time" name="time" required>
-                </div>
-                
-                <div>
-                    <label for="status">Status:</label>
-                    <select name="status" id="status" required>
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="Completed">Completed</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="gender">Gender:</label>
-                    <select name="gender" id="gender" required>
-                        <option value="" disabled selected>Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
+        <h3>SOS Alerts</h3>
+        <table class="actions-table">
+            <thead>
+                <tr>
+                    <th>Alert ID</th>
+                    <th>Roll Number</th>
+                    <th>Timestamp</th>
+                    <th>Status</th>
+                    <th>Contact</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alert in sos_alerts_list %}
+                <tr class="{{ 'resolved' if alert.resolved else 'pending' }}">
+                    <td>{{ alert.id }}</td>
+                    <td>{{ alert.roll_number }}</td>
+                    <td>{{ alert.timestamp }}</td>
+                    <td>{{ "Resolved" if alert.resolved else "Pending" }}</td>
+                    <td><a href="tel:{{ alert.contact }}" class="call-button">📞 Call</a></td>
+                    <td>
+                        {% if not alert.resolved %}
+                        <button onclick="markResolved('sos', {{ alert.id }})">Mark Resolved</button>
+                        {% else %}
+                        <button disabled>Resolved</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-                <div>
-                    <label for="contact">Contact Info:</label>
-                    <input type="text" id="contact" name="contact" required placeholder="Phone number or other contact">
-                </div>
-                
-            </div>
-            
-            <button type="submit">Add Ride</button>
-        </form>
+    <!-- Ride Issues Table -->
+    <div class="ride-panel">
+        <h3>Ride Issues</h3>
+        <table class="actions-table">
+            <thead>
+                <tr>
+                    <th>Issue ID</th>
+                    <th>Roll Number</th>
+                    <th>Issue Type</th>
+                    <th>Description</th>
+                    <th>Timestamp</th>
+                    <th>Status</th>
+                    <th>Contact</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in ride_issues_list %}
+                <tr class="{{ 'resolved' if issue.resolved else 'pending' }}">
+                    <td>{{ issue.id }}</td>
+                    <td>{{ issue.roll_number }}</td>
+                    <td>{{ issue.issue_type }}</td>
+                    <td>{{ issue.description }}</td>
+                    <td>{{ issue.timestamp }}</td>
+                    <td>{{ "Resolved" if issue.resolved else "Pending" }}</td>
+                    <td><a href="tel:{{ issue.contact }}" class="call-button">📞 Call</a></td>
+                    <td>
+                        {% if not issue.resolved %}
+                        <button onclick="markResolved('issue', {{ issue.id }})">Mark Resolved</button>
+                        {% else %}
+                        <button disabled>Resolved</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
     <!-- Ride Table -->
@@ -265,6 +290,7 @@
                     <th>Time</th>
                     <th>Status</th>
                     <th>Gender</th>
+                    <th>Contact</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -277,6 +303,7 @@
                     <td>{{ ride[3] }}</td>
                     <td>{{ ride[4] }}</td>
                     <td>{{ ride[5] }}</td>
+                    <td><a href="tel:{{ ride[6] }}" class="call-button">📞 Call</a></td>
                     <td>
                         <button onclick="editRide('{{ ride[0] }}')">Edit</button>
                         <button onclick="deleteRide('{{ ride[0] }}')">Delete</button>
@@ -338,6 +365,34 @@
             if (confirm(`Are you sure you want to delete the ride for ${rollNumber}?`)) {
                 // In a real app, this would make an AJAX call to the server
                 alert(`Ride for ${rollNumber} has been deleted.`);
+            }
+        }
+        
+        // Mark resolved functionality
+        function markResolved(type, id) {
+            if (confirm(`Are you sure you want to mark this ${type} as resolved?`)) {
+                // In a real app, this would make an AJAX call to the server
+                const endpoint = type === 'sos' ? '/resolve_sos' : '/resolve_issue';
+                
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert(`${type.charAt(0).toUpperCase() + type.slice(1)} has been marked as resolved.`);
+                        location.reload();
+                    } else {
+                        alert('There was an error updating the status.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('There was an error updating the status.');
+                });
             }
         }
     </script>

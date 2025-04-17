@@ -104,6 +104,18 @@
             text-decoration: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
+        .call-button {
+        background-color: #27ae60;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        }
+        
+        .call-button:hover {
+            background-color: #219653;
+        }
     </style>
 </head>
 <body>
@@ -193,6 +205,7 @@
                     <th>Time</th>
                     <th>Status</th>
                     <th>Gender</th>
+                    <th>Contact</th>
                 </tr>
             </thead>
             <tbody>
@@ -204,6 +217,7 @@
                     <td>{{ ride[3] }}</td>
                     <td>{{ ride[4] }}</td>
                     <td>{{ ride[5] }}</td>
+                    <td><a href="tel:{{ ride[6] }}" class="call-button">📞 Call</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -214,7 +228,7 @@
     </div>
 
     <!-- SOS Button -->
-    <a href="#" class="sos-button" onclick="sendSOS()">SOS</a>
+    <a href="tel:7439947074" class="sos-button" onclick="return confirm('Are you sure you want to call emergency number?')">SOS</a>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>

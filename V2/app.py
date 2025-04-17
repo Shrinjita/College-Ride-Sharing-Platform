@@ -117,16 +117,60 @@ def admin_dashboard():
         'sos_alerts': cursor.execute("SELECT COUNT(*) FROM sos_alerts WHERE resolved = 0").fetchone()[0],
     }
     
-    # Get rides data including gender
+    # Get SOS alerts data
     cursor.execute("""
-        SELECT user.roll_number, ride.pickup, ride."drop", ride.time, ride.status, ride.gender
+        SELECT sos_alerts.id, user.roll_number, sos_alerts.timestamp, sos_alerts.resolved, ride.contact
+        FROM sos_alerts 
+        JOIN user ON sos_alerts.user_id = user.id
+        LEFT JOIN ride ON ride.user_id = user.id
+        ORDER BY sos_alerts.timestamp DESC
+    """)
+    sos_alerts_data = cursor.fetchall()
+    sos_alerts_list = [
+        {
+            'id': row[0],
+            'roll_number': row[1],
+            'timestamp': row[2],
+            'resolved': bool(row[3]),
+            'contact': row[4] or "N/A"
+        }
+        for row in sos_alerts_data
+    ]
+    
+    # Get ride issues data
+    cursor.execute("""
+        SELECT ride_issues.id, user.roll_number, ride_issues.issue_type, 
+               ride_issues.description, ride_issues.timestamp, ride_issues.resolved, ride.contact
+        FROM ride_issues 
+        JOIN ride ON ride_issues.ride_id = ride.id
+        JOIN user ON ride.user_id = user.id
+        ORDER BY ride_issues.timestamp DESC
+    """)
+    ride_issues_data = cursor.fetchall()
+    ride_issues_list = [
+        {
+            'id': row[0],
+            'roll_number': row[1],
+            'issue_type': row[2],
+            'description': row[3],
+            'timestamp': row[4],
+            'resolved': bool(row[5]),
+            'contact': row[6] or "N/A"
+        }
+        for row in ride_issues_data
+    ]
+    
+    # Get rides data including gender and contact
+    cursor.execute("""
+        SELECT user.roll_number, ride.pickup, ride."drop", ride.time, ride.status, ride.gender, ride.contact
         FROM ride JOIN user ON ride.user_id = user.id
         ORDER BY ride.created_at DESC
     """)
     rides = cursor.fetchall()
     conn.close()
     
-    return render_template("admin.html", rides=rides, **stats)
+    return render_template("admin.html", rides=rides, sos_alerts_list=sos_alerts_list, 
+                           ride_issues_list=ride_issues_list, **stats)
 
 @app.route('/user')
 def user_dashboard():
@@ -137,7 +181,7 @@ def user_dashboard():
     conn = sqlite3.connect('ride_pool.db')
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT user.roll_number, ride.pickup, ride."drop", ride.time, ride.status, ride.gender
+        SELECT user.roll_number, ride.pickup, ride."drop", ride.time, ride.status, ride.gender, ride.contact
         FROM ride JOIN user ON ride.user_id = user.id
         WHERE user.roll_number = ?
         ORDER BY 
@@ -276,5 +320,47 @@ def logout():
     session.clear()
     return redirect(url_for('signin'))
 
+@app.route('/resolve_sos', methods=['POST'])
+def resolve_sos():
+    if session.get('roll') != ADMIN_ROLL:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    alert_id = request.json.get('id')
+    if not alert_id:
+        return jsonify({'error': 'Missing alert ID'}), 400
+    
+    conn = sqlite3.connect('ride_pool.db')
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("UPDATE sos_alerts SET resolved = 1 WHERE id = ?", (alert_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except sqlite3.Error as e:
+        conn.close()
+        return jsonify({'error': f'Database error: {e}'}), 500
+
+@app.route('/resolve_issue', methods=['POST'])
+def resolve_issue():
+    if session.get('roll') != ADMIN_ROLL:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    issue_id = request.json.get('id')
+    if not issue_id:
+        return jsonify({'error': 'Missing issue ID'}), 400
+    
+    conn = sqlite3.connect('ride_pool.db')
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("UPDATE ride_issues SET resolved = 1 WHERE id = ?", (issue_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except sqlite3.Error as e:
+        conn.close()
+        return jsonify({'error': f'Database error: {e}'}), 500
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
