@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import sqlite3
 import os
+import datetime
 from dotenv import load_dotenv
 
 load_dotenv()  # Load environment variables from .env file
@@ -28,9 +29,29 @@ def init_db():
         "drop" TEXT NOT NULL,
         time TEXT NOT NULL,
         status TEXT NOT NULL,
-        gender TEXT,  -- Add gender field
+        gender TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES user (id)
+        )
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS sos_alerts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        resolved BOOLEAN DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES user (id)
+        )
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS ride_issues (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ride_id INTEGER NOT NULL,
+        issue_type TEXT NOT NULL,
+        description TEXT,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        resolved BOOLEAN DEFAULT 0,
+        FOREIGN KEY (ride_id) REFERENCES ride (id)
         )
     """)
     conn.commit()
@@ -91,12 +112,16 @@ def admin_dashboard():
         'total_rides': cursor.execute("SELECT COUNT(*) FROM ride").fetchone()[0],
         'active_rides': cursor.execute("SELECT COUNT(*) FROM ride WHERE status = 'Scheduled'").fetchone()[0],
         'total_users': cursor.execute("SELECT COUNT(*) FROM user").fetchone()[0],
+        'active_users': cursor.execute("SELECT COUNT(DISTINCT user_id) FROM ride WHERE status = 'Scheduled' OR (status = 'Completed' AND date(created_at) = date('now'))").fetchone()[0],
+        'ride_issues': cursor.execute("SELECT COUNT(*) FROM ride_issues WHERE resolved = 0").fetchone()[0],
+        'sos_alerts': cursor.execute("SELECT COUNT(*) FROM sos_alerts WHERE resolved = 0").fetchone()[0],
     }
     
     # Get rides data including gender
     cursor.execute("""
         SELECT user.roll_number, ride.pickup, ride."drop", ride.time, ride.status, ride.gender
         FROM ride JOIN user ON ride.user_id = user.id
+        ORDER BY ride.created_at DESC
     """)
     rides = cursor.fetchall()
     conn.close()
@@ -115,6 +140,13 @@ def user_dashboard():
         SELECT user.roll_number, ride.pickup, ride."drop", ride.time, ride.status, ride.gender
         FROM ride JOIN user ON ride.user_id = user.id
         WHERE user.roll_number = ?
+        ORDER BY 
+            CASE ride.status 
+                WHEN 'Scheduled' THEN 1 
+                WHEN 'Completed' THEN 2 
+                ELSE 3 
+            END,
+            ride.created_at DESC
     """, (roll,))
     rides = cursor.fetchall()
     conn.close()
@@ -133,11 +165,15 @@ def add_ride():
     drop = request.form.get('drop')
     time = request.form.get('time')
     status = request.form.get('status')
-    gender = request.form.get('gender')  # Get gender field
+    gender = request.form.get('gender')
 
     # Validate required fields
     if not all([pickup, drop, time, status]):
         return "All fields are required", 400
+        
+    # Prevent same pickup and drop location
+    if pickup == drop:
+        return "Pickup and drop locations cannot be the same", 400
 
     user_id = get_or_create_user(roll_number)
 
@@ -156,6 +192,63 @@ def add_ride():
 
     return redirect(url_for('admin_dashboard' if is_admin else 'user_dashboard'))
 
+@app.route('/send_sos', methods=['POST'])
+def send_sos():
+    if 'roll' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+        
+    roll = session.get('roll')
+    
+    conn = sqlite3.connect('ride_pool.db')
+    cursor = conn.cursor()
+    
+    # Get user ID
+    cursor.execute("SELECT id FROM user WHERE roll_number = ?", (roll,))
+    result = cursor.fetchone()
+    
+    if not result:
+        conn.close()
+        return jsonify({'error': 'User not found'}), 404
+    
+    user_id = result[0]
+    
+    # Add SOS alert
+    try:
+        cursor.execute("INSERT INTO sos_alerts (user_id) VALUES (?)", (user_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'message': 'SOS alert sent successfully'})
+    except sqlite3.Error as e:
+        conn.close()
+        return jsonify({'error': f'Database error: {e}'}), 500
+
+@app.route('/report_issue', methods=['POST'])
+def report_issue():
+    if 'roll' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+        
+    ride_id = request.json.get('ride_id')
+    issue_type = request.json.get('issue_type')
+    description = request.json.get('description')
+    
+    if not all([ride_id, issue_type]):
+        return jsonify({'error': 'Missing required fields'}), 400
+        
+    conn = sqlite3.connect('ride_pool.db')
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            INSERT INTO ride_issues (ride_id, issue_type, description)
+            VALUES (?, ?, ?)
+        """, (ride_id, issue_type, description))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'message': 'Issue reported successfully'})
+    except sqlite3.Error as e:
+        conn.close()
+        return jsonify({'error': f'Database error: {e}'}), 500
+
 @app.route('/admin_stats')
 def admin_stats():
     if session.get('roll') != ADMIN_ROLL:
@@ -163,10 +256,13 @@ def admin_stats():
 
     conn = sqlite3.connect('ride_pool.db')
     cursor = conn.cursor()
+    
+    # Get current date in YYYY-MM-DD format
+    today = datetime.datetime.now().strftime('%Y-%m-%d')
+    
     stats = {
         'total_rides': cursor.execute("SELECT COUNT(*) FROM ride").fetchone()[0],
-        'active_rides': cursor.execute("SELECT COUNT(*) FROM ride WHERE status = 'Scheduled'").fetchone()[0],
-        'completed_rides': cursor.execute("SELECT COUNT(*) FROM ride WHERE status = 'Completed'").fetchone()[0],
+        'active_rides': cursor.execute("SELECT COUNT(*) FROM ride WHERE status ='completed_rides': cursor.execute("SELECT COUNT(*) FROM ride WHERE status = 'Completed'").fetchone()[0],
         'total_users': cursor.execute("SELECT COUNT(*) FROM user").fetchone()[0],
         'active_users': cursor.execute("SELECT COUNT(DISTINCT user_id) FROM ride WHERE status = 'Scheduled' OR (status = 'Completed' AND date(created_at) = date('now'))").fetchone()[0],
         'new_users_today': cursor.execute("SELECT COUNT(*) FROM user WHERE date(created_at) = date('now')").fetchone()[0],
