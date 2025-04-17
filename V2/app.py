@@ -166,9 +166,10 @@ def add_ride():
     time = request.form.get('time')
     status = request.form.get('status')
     gender = request.form.get('gender')
+    contact = request.form.get('contact')  # Add this line to get contact info
 
     # Validate required fields
-    if not all([pickup, drop, time, status]):
+    if not all([pickup, drop, time, status, gender, contact]):  # Add contact to validation
         return "All fields are required", 400
         
     # Prevent same pickup and drop location
@@ -181,9 +182,9 @@ def add_ride():
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            INSERT INTO ride (user_id, pickup, "drop", time, status, gender)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (user_id, pickup, drop, time, status, gender))
+            INSERT INTO ride (user_id, pickup, "drop", time, status, gender, contact)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (user_id, pickup, drop, time, status, gender, contact))  # Add contact parameter
         conn.commit()
     except sqlite3.Error as e:
         conn.close()
