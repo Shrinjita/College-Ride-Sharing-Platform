@@ -14,13 +14,38 @@
             <li>Contact</li>
         </ul>
     </nav>
-    <form class="login-box" method="POST" action="{{ url_for('signin') }}">
+<!-- Add this registration section to signin.html -->
+    <form class="login-box register-form" method="POST" action="{{ url_for('register') }}" style="display: none;">
+        <h2>Register</h2>
+        <label>Registration Number</label>
+        <input type="text" name="roll_number" pattern="RA2211047010[0-9]{3}" title="Format: RA2211047010xxx where xxx is between 000-999" required>
+        <label>Phone Number</label>
+        <input type="tel" name="phone_number" pattern="[0-9]{10}" title="Please enter a 10-digit phone number" required>
+        <button type="submit">Register</button>
+        <p>Already have an account? <a href="#" onclick="toggleForms()">Sign In</a></p>
+    </form>
+    <form class="login-box login-form" method="POST" action="{{ url_for('login') }}">
         <h2>Sign In</h2>
-        <label>Username</label>
-        <input type="text" name="username" required>
+        <label>Registration Number</label>
+        <input type="text" name="username" pattern="RA2211047010[0-9]{3}" title="Format: RA2211047010xxx" required>
         <label>Password</label>
         <input type="password" name="password" required>
         <button type="submit">Login</button>
+        <p>Don't have an account? <a href="#" onclick="toggleForms()">Register</a></p>
     </form>
+    <script>
+        function toggleForms() {
+            const loginForm = document.querySelector('.login-form');
+            const registerForm = document.querySelector('.register-form');
+            
+            if (loginForm.style.display === 'none') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            }
+        }
+    </script>
     </body>
 </html>

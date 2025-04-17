@@ -14,12 +14,14 @@ ADMIN_ROLL = "RA2211047010017"
 def init_db():
     conn = sqlite3.connect('ride_pool.db')
     cursor = conn.cursor()
+    # In the init_db function
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS user (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             roll_number TEXT UNIQUE NOT NULL,
+            phone_number TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+    )
     """)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS ride (
@@ -77,6 +79,38 @@ init_db()
 def signin():
     return render_template('signin.html')
 
+@app.route('/register', methods=['POST'])
+def register():
+    roll = request.form.get('roll_number')
+    phone = request.form.get('phone_number')
+    
+    # Validate roll number format
+    if not roll.startswith("RA2211047010") or not roll[13:].isdigit() or not (0 <= int(roll[-3:]) <= 999):
+        return "Invalid Roll Number", 403
+        
+    # Create user in database with phone number
+    conn = sqlite3.connect('ride_pool.db')
+    cursor = conn.cursor()
+    
+    try:
+        # Check if user already exists
+        cursor.execute("SELECT id FROM user WHERE roll_number = ?", (roll,))
+        if cursor.fetchone():
+            conn.close()
+            return "User already exists", 403
+            
+        # Insert new user with phone number
+        cursor.execute("INSERT INTO user (roll_number, phone_number) VALUES (?, ?)", (roll, phone))
+        conn.commit()
+        conn.close()
+        
+        # Auto-login after registration
+        session['roll'] = roll
+        return redirect(url_for('user_dashboard'))
+    except sqlite3.Error as e:
+        conn.close()
+        return f"Database error: {e}", 500
+
 @app.route('/login', methods=['POST'])
 def login():
     roll = request.form.get('username')
@@ -86,14 +120,15 @@ def login():
         return "Username and password are required", 403
         
     # Validate roll number format
-    if not roll.startswith("RA2211047010") or not roll[13:].isdigit() or not (1 <= int(roll[-3:]) <= 100):
+    if not roll.startswith("RA2211047010") or not roll[13:].isdigit() or not (0 <= int(roll[-3:]) <= 999):
         return "Invalid Roll Number", 403
 
     if roll == ADMIN_ROLL and password == "ADMIN":
         session['roll'] = roll
         return redirect(url_for('admin_dashboard'))
 
-    if password == roll[-3:] + "srm":
+    # Fix: Changed from roll[-3:] + "srm" to "srm" + roll[-3:]
+    if password == "srm" + roll[-3:]:
         session['roll'] = roll
         return redirect(url_for('user_dashboard'))
 
