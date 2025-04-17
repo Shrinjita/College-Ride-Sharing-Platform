@@ -7,7 +7,7 @@
     <style>
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin: 20px;
         }
@@ -19,12 +19,36 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             font-size: 18px;
             text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2980b9;
+            margin: 10px 0;
+        }
+        
+        .card.warning .number {
+            color: #f39c12;
+        }
+        
+        .card.danger .number {
+            color: #e74c3c;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         th, td {
@@ -37,9 +61,56 @@
             background-color: #3498db;
             color: white;
         }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        tr:hover {
+            background-color: #e8f4fd;
+        }
 
         h3 {
             margin-top: 40px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .search-bar {
+            margin: 20px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .search-bar input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 70%;
+        }
+        
+        .search-bar button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            margin: 0 20px 20px;
+        }
+        
+        .filter-controls select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -49,51 +120,137 @@
         <div class="user-info">Admin | <a href="/logout">Logout</a></div>
     </header>
 
-    <!-- Bento Cards -->
+    <!-- Dashboard Cards -->
     <div class="dashboard">
         <div class="card">
-            <strong>Total Rides:</strong><br>
-            {{ total_rides }}
+            <div>Total Rides</div>
+            <div class="number">{{ total_rides }}</div>
         </div>
         <div class="card">
-            <strong>Active Rides:</strong><br>
-            {{ active_rides }}
+            <div>Active Rides</div>
+            <div class="number">{{ active_rides }}</div>
         </div>
         <div class="card">
-            <strong>Registered Users:</strong><br>
-            {{ total_users }}
+            <div>Total Users</div>
+            <div class="number">{{ total_users }}</div>
+        </div>
+        <div class="card">
+            <div>Active Users Today</div>
+            <div class="number">{{ active_users }}</div>
+        </div>
+        <div class="card warning">
+            <div>Ride Issues</div>
+            <div class="number">{{ ride_issues }}</div>
+        </div>
+        <div class="card danger">
+            <div>SOS Alerts</div>
+            <div class="number">{{ sos_alerts }}</div>
         </div>
     </div>
 
-    <!-- User Table -->
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search rides or users...">
+        <button onclick="performSearch()">Search</button>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="filter-controls">
+        <select id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="Scheduled">Scheduled</option>
+            <option value="Completed">Completed</option>
+        </select>
+        
+        <select id="locationFilter">
+            <option value="">All Locations</option>
+            <option value="srm arch gate">SRM Arch Gate</option>
+            <option value="java">Java</option>
+            <option value="hospital">Hospital</option>
+            <option value="abode">Abode</option>
+            <option value="estancia">Estancia</option>
+            <option value="akshara">Akshara</option>
+            <option value="akshaya">Akshaya</option>
+        </select>
+        
+        <select id="genderFilter">
+            <option value="">All Genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+
+    <!-- Add Ride Form -->
     <div class="ride-panel">
-        <h3>Registered Users</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Roll Number</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user.roll }}</td>
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.status }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <h3>Add New Ride</h3>
+        <form method="POST" action="/add_ride">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label for="roll_number">Roll Number:</label>
+                    <input type="text" id="roll_number" name="roll_number" required pattern="RA2211047010\d{3}" title="Format: RA2211047010XXX">
+                </div>
+                
+                <div>
+                    <label for="pickup">Pickup Location:</label>
+                    <select name="pickup" id="pickup" required>
+                        <option value="" disabled selected>Select Pickup</option>
+                        <option value="srm arch gate">SRM Arch Gate</option>
+                        <option value="java">Java</option>
+                        <option value="hospital">Hospital</option>
+                        <option value="abode">Abode</option>
+                        <option value="estancia">Estancia</option>
+                        <option value="akshara">Akshara</option>
+                        <option value="akshaya">Akshaya</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="drop">Drop Location:</label>
+                    <select name="drop" id="drop" required>
+                        <option value="" disabled selected>Select Drop</option>
+                        <option value="srm arch gate">SRM Arch Gate</option>
+                        <option value="java">Java</option>
+                        <option value="hospital">Hospital</option>
+                        <option value="abode">Abode</option>
+                        <option value="estancia">Estancia</option>
+                        <option value="akshara">Akshara</option>
+                        <option value="akshaya">Akshaya</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="time">Time:</label>
+                    <input type="time" id="time" name="time" required>
+                </div>
+                
+                <div>
+                    <label for="status">Status:</label>
+                    <select name="status" id="status" required>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="gender">Gender:</label>
+                    <select name="gender" id="gender" required>
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit">Add Ride</button>
+        </form>
     </div>
 
     <!-- Ride Table -->
     <div class="ride-panel">
         <h3>All Rides</h3>
-        <table>
+        <table id="ridesTable">
             <thead>
                 <tr>
                     <th>Roll Number</th>
@@ -101,6 +258,8 @@
                     <th>Drop</th>
                     <th>Time</th>
                     <th>Status</th>
+                    <th>Gender</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -111,10 +270,70 @@
                     <td>{{ ride[2] }}</td>
                     <td>{{ ride[3] }}</td>
                     <td>{{ ride[4] }}</td>
+                    <td>{{ ride[5] }}</td>
+                    <td>
+                        <button onclick="editRide('{{ ride[0] }}')">Edit</button>
+                        <button onclick="deleteRide('{{ ride[0] }}')">Delete</button>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Search functionality
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+            const genderFilter = document.getElementById('genderFilter').value.toLowerCase();
+            
+            const table = document.getElementById('ridesTable');
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const rollNumber = row.cells[0].textContent.toLowerCase();
+                const pickup = row.cells[1].textContent.toLowerCase();
+                const drop = row.cells[2].textContent.toLowerCase();
+                const status = row.cells[4].textContent.toLowerCase();
+                const gender = row.cells[5].textContent.toLowerCase();
+                
+                const matchesSearch = !searchTerm || 
+                    rollNumber.includes(searchTerm) || 
+                    pickup.includes(searchTerm) || 
+                    drop.includes(searchTerm);
+                    
+                const matchesStatus = !statusFilter || status === statusFilter;
+                const matchesLocation = !locationFilter || pickup === locationFilter || drop === locationFilter;
+                const matchesGender = !genderFilter || gender === genderFilter;
+                
+                if (matchesSearch && matchesStatus && matchesLocation && matchesGender) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        }
+        
+        // Filter event listeners
+        document.getElementById('statusFilter').addEventListener('change', performSearch);
+        document.getElementById('locationFilter').addEventListener('change', performSearch);
+        document.getElementById('genderFilter').addEventListener('change', performSearch);
+        
+        // Edit and delete functionality (placeholder)
+        function editRide(rollNumber) {
+            alert(`Edit functionality for ride with roll number ${rollNumber} would be implemented here.`);
+        }
+        
+        function deleteRide(rollNumber) {
+            if (confirm(`Are you sure you want to delete the ride for ${rollNumber}?`)) {
+                // In a real app, this would make an AJAX call to the server
+                alert(`Ride for ${rollNumber} has been deleted.`);
+            }
+        }
+    </script>
 </body>
 </html>
