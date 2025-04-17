@@ -25,12 +25,12 @@ def init_db():
     CREATE TABLE IF NOT EXISTS ride (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
-        pickup TEXT NOT NULL,
-        "drop" TEXT NOT NULL,
-        time TEXT NOT NULL,
-        status TEXT NOT NULL,
-        gender TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        pickup VARCHAR(50) NOT NULL,
+        "drop" VARCHAR(50) NOT NULL,
+        time VARCHAR(20) NOT NULL,
+        gender VARCHAR(10) NOT NULL,
+        contact VARCHAR(50) NOT NULL,
+        status VARCHAR(20),
         FOREIGN KEY (user_id) REFERENCES user (id)
         )
     """)
@@ -257,20 +257,18 @@ def admin_stats():
     conn = sqlite3.connect('ride_pool.db')
     cursor = conn.cursor()
     
-    # Get current date in YYYY-MM-DD format
-    today = datetime.datetime.now().strftime('%Y-%m-%d')
-    
     stats = {
         'total_rides': cursor.execute("SELECT COUNT(*) FROM ride").fetchone()[0],
-        'active_rides': cursor.execute("SELECT COUNT(*) FROM ride WHERE status ='completed_rides': cursor.execute("SELECT COUNT(*) FROM ride WHERE status = 'Completed'").fetchone()[0],
+        'active_rides': cursor.execute("SELECT COUNT(*) FROM ride WHERE status = 'Scheduled'").fetchone()[0],
+        'completed_rides': cursor.execute("SELECT COUNT(*) FROM ride WHERE status = 'Completed'").fetchone()[0],
         'total_users': cursor.execute("SELECT COUNT(*) FROM user").fetchone()[0],
-        'active_users': cursor.execute("SELECT COUNT(DISTINCT user_id) FROM ride WHERE status = 'Scheduled' OR (status = 'Completed' AND date(created_at) = date('now'))").fetchone()[0],
+        'active_users': cursor.execute("SELECT COUNT(DISTINCT user_id) FROM ride WHERE status = 'Scheduled'").fetchone()[0],
         'new_users_today': cursor.execute("SELECT COUNT(*) FROM user WHERE date(created_at) = date('now')").fetchone()[0],
-        'ride_issues': 0,
-        'sos_alerts': 0
+        'ride_issues': cursor.execute("SELECT COUNT(*) FROM ride_issues WHERE resolved = 0").fetchone()[0],
+        'sos_alerts': cursor.execute("SELECT COUNT(*) FROM sos_alerts WHERE resolved = 0").fetchone()[0]
     }
     conn.close()
-    return stats
+    return jsonify(stats)
 
 @app.route('/logout')
 def logout():
