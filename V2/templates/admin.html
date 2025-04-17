@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SRM Ride Pool - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px;
+        }
+
+        .card {
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-size: 18px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        h3 {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>SRM Ride Pool - Admin Dashboard</h2>
+        <div class="user-info">Admin | <a href="/logout">Logout</a></div>
+    </header>
+
+    <!-- Bento Cards -->
+    <div class="dashboard">
+        <div class="card">
+            <strong>Total Rides:</strong><br>
+            {{ total_rides }}
+        </div>
+        <div class="card">
+            <strong>Active Rides:</strong><br>
+            {{ active_rides }}
+        </div>
+        <div class="card">
+            <strong>Registered Users:</strong><br>
+            {{ total_users }}
+        </div>
+    </div>
+
+    <!-- User Table -->
+    <div class="ride-panel">
+        <h3>Registered Users</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.roll }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Ride Table -->
+    <div class="ride-panel">
+        <h3>All Rides</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Pickup</th>
+                    <th>Drop</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ride in rides %}
+                <tr>
+                    <td>{{ ride[0] }}</td>
+                    <td>{{ ride[1] }}</td>
+                    <td>{{ ride[2] }}</td>
+                    <td>{{ ride[3] }}</td>
+                    <td>{{ ride[4] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

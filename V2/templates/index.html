@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SRM Ride Pool - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Button Styles */
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal form {
+            display: grid;
+            gap: 15px;
+        }
+
+        .modal label {
+            font-weight: 600;
+            margin-bottom: -10px;
+        }
+
+        .modal input,
+        .modal select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .modal input:focus,
+        .modal select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .modal button[type="submit"] {
+            background-color: #2ecc71;
+            margin-top: 10px;
+        }
+
+        .modal button[type="submit"]:hover {
+            background-color: #27ae60;
+        }
+
+        .modal button[type="button"] {
+            background-color: #e74c3c;
+        }
+
+        .modal button[type="button"]:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <h2>SRM Ride Pool</h2>
+        <div class="user-info">
+            Logged in as: {{ roll }} |
+            <a href="/logout">Logout</a>  <!-- Changed from "/" to "/logout" -->
+        </div>
+    </header>
+
+    <!-- Centered Add Ride Button -->
+    <div style="text-align: center;">
+        <button onclick="openModal()">Add Ride</button>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="rideFormModal" class="modal">
+        <form method="POST" action="/add_ride">
+            <input type="hidden" name="roll_number" value="{{ roll }}">
+
+            <label>Pickup Location</label>
+            <select name="pickup" id="pickup" required>
+                <option value="" disabled selected>Select Pickup</option>
+                <option value="srm arch gate">SRM Arch Gate</option>
+                <option value="java">Java</option>
+                <option value="hospital">Hospital</option>
+                <option value="abode">Abode</option>
+                <option value="estancia">Estancia</option>
+                <option value="akshara">Akshara</option>
+                <option value="akshaya">Akshaya</option>
+            </select>
+
+            <label>Drop Location</label>
+            <select name="drop" id="drop" required>
+                <option value="" disabled selected>Select Drop</option>
+                <option value="srm arch gate">SRM Arch Gate</option>
+                <option value="java">Java</option>
+                <option value="hospital">Hospital</option>
+                <option value="abode">Abode</option>
+                <option value="estancia">Estancia</option>
+                <option value="akshara">Akshara</option>
+                <option value="akshaya">Akshaya</option>
+            </select>
+
+            <label>Time</label>
+            <input type="time" name="time" id="time" required>
+
+            <label>Status</label>
+            <select name="status" id="status">
+                <option value="Scheduled">Scheduled</option>
+                <option value="Completed">Completed</option>
+            </select>
+
+            <label>Gender</label>
+            <select name="gender" id="gender" required>
+                <option value="" disabled selected>Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <button type="submit">Submit Ride</button>
+            <button type="button" onclick="closeModal()">Cancel</button>
+        </form>
+    </div>
+
+    <!-- Ride Table -->
+    <div class="ride-panel">
+        <h2>Your Rides</h2>
+        {% if rides %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Pickup</th>
+                    <th>Drop</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Gender</th> <!-- Add Gender column -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for ride in rides %}
+                <tr>
+                    <td>{{ ride[0] }}</td>
+                    <td>{{ ride[1] }}</td>
+                    <td>{{ ride[2] }}</td>
+                    <td>{{ ride[3] }}</td>
+                    <td>{{ ride[4] }}</td>
+                    <td>{{ ride[5] }}</td> <!-- Display Gender -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No rides found. Add your first ride!</p>
+        {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
