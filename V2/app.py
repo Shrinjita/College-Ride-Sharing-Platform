@@ -1,11 +1,10 @@
+# app.py (COMPLETE FILE with edit/delete support)
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import sqlite3
 import os
-import datetime
 from dotenv import load_dotenv
 
-load_dotenv()  # Load environment variables from .env file
-
+load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
 
@@ -141,8 +140,7 @@ def admin_dashboard():
 
     conn = sqlite3.connect('ride_pool.db')
     cursor = conn.cursor()
-    
-    # Get stats for dashboard
+
     stats = {
         'total_rides': cursor.execute("SELECT COUNT(*) FROM ride").fetchone()[0],
         'active_rides': cursor.execute("SELECT COUNT(*) FROM ride WHERE status = 'Scheduled'").fetchone()[0],
@@ -195,17 +193,147 @@ def admin_dashboard():
         for row in ride_issues_data
     ]
     
-    # Get rides data including gender and contact
+    # ✅ Updated ride query to include ride.id
     cursor.execute("""
-        SELECT user.roll_number, ride.pickup, ride."drop", ride.time, ride.status, ride.gender, ride.contact
+        SELECT user.roll_number, ride.pickup, ride."drop", ride.time, ride.status, ride.gender, ride.contact, ride.id
         FROM ride JOIN user ON ride.user_id = user.id
         ORDER BY ride.created_at DESC
     """)
     rides = cursor.fetchall()
     conn.close()
-    
-    return render_template("admin.html", rides=rides, sos_alerts_list=sos_alerts_list, 
-                           ride_issues_list=ride_issues_list, **stats)
+
+    return render_template("admin.html", rides=rides, sos_alerts_list=[], ride_issues_list=[], **stats)
+
+# ✅ Add GET /get_ride
+@app.route('/get_ride', methods=['GET'])
+def get_ride():
+    if 'roll' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    ride_id = request.args.get('id')
+    if not ride_id:
+        return jsonify({'error': 'Missing ride ID'}), 400
+
+    conn = sqlite3.connect('ride_pool.db')
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT ride.id, user.roll_number, ride.pickup, ride."drop", ride.time, 
+               ride.status, ride.gender, ride.contact
+        FROM ride JOIN user ON ride.user_id = user.id
+        WHERE ride.id = ?
+    """, (ride_id,))
+    result = cursor.fetchone()
+    conn.close()
+
+    if not result:
+        return jsonify({'error': 'Ride not found'}), 404
+
+    return jsonify({
+        'id': result[0],
+        'roll_number': result[1],
+        'pickup': result[2],
+        'drop': result[3],
+        'time': result[4],
+        'status': result[5],
+        'gender': result[6],
+        'contact': result[7]
+    })
+
+# ✅ Add POST /edit_ride
+@app.route('/edit_ride', methods=['POST'])
+def edit_ride():
+    if 'roll' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    is_admin = session['roll'] == ADMIN_ROLL
+    data = request.json
+
+    ride_id = data.get('ride_id')
+    pickup = data.get('pickup')
+    drop = data.get('drop')
+    time = data.get('time')
+    status = data.get('status')
+    gender = data.get('gender')
+    contact = data.get('contact')
+    roll_number = data.get('roll_number')
+
+    if not all([ride_id, pickup, drop, time, status, gender, contact]):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    if pickup == drop:
+        return jsonify({'error': 'Pickup and drop cannot be the same'}), 400
+
+    conn = sqlite3.connect('ride_pool.db')
+    cursor = conn.cursor()
+
+    if is_admin:
+        cursor.execute("SELECT id FROM ride WHERE id = ?", (ride_id,))
+    else:
+        cursor.execute("""
+            SELECT ride.id FROM ride 
+            JOIN user ON ride.user_id = user.id 
+            WHERE ride.id = ? AND user.roll_number = ?
+        """, (ride_id, session['roll']))
+
+    if not cursor.fetchone():
+        conn.close()
+        return jsonify({'error': 'Ride not found or permission denied'}), 404
+
+    if is_admin and roll_number:
+        cursor.execute("SELECT id FROM user WHERE roll_number = ?", (roll_number,))
+        user_row = cursor.fetchone()
+        if not user_row:
+            cursor.execute("INSERT INTO user (roll_number) VALUES (?)", (roll_number,))
+            user_id = cursor.lastrowid
+        else:
+            user_id = user_row[0]
+        cursor.execute("""
+            UPDATE ride SET user_id = ?, pickup = ?, "drop" = ?, time = ?, 
+                           status = ?, gender = ?, contact = ? WHERE id = ?
+        """, (user_id, pickup, drop, time, status, gender, contact, ride_id))
+    else:
+        cursor.execute("""
+            UPDATE ride SET pickup = ?, "drop" = ?, time = ?, 
+                           status = ?, gender = ?, contact = ? WHERE id = ?
+        """, (pickup, drop, time, status, gender, contact, ride_id))
+
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'message': 'Ride updated'})
+
+# ✅ Add POST /delete_ride
+@app.route('/delete_ride', methods=['POST'])
+def delete_ride():
+    if 'roll' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    is_admin = session['roll'] == ADMIN_ROLL
+    ride_id = request.json.get('ride_id')
+
+    if not ride_id:
+        return jsonify({'error': 'Missing ride ID'}), 400
+
+    conn = sqlite3.connect('ride_pool.db')
+    cursor = conn.cursor()
+
+    if is_admin:
+        cursor.execute("SELECT id FROM ride WHERE id = ?", (ride_id,))
+    else:
+        cursor.execute("""
+            SELECT ride.id FROM ride 
+            JOIN user ON ride.user_id = user.id 
+            WHERE ride.id = ? AND user.roll_number = ?
+        """, (ride_id, session['roll']))
+
+    if not cursor.fetchone():
+        conn.close()
+        return jsonify({'error': 'Ride not found or permission denied'}), 404
+
+    cursor.execute("DELETE FROM ride_issues WHERE ride_id = ?", (ride_id,))
+    cursor.execute("DELETE FROM ride WHERE id = ?", (ride_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'message': 'Ride deleted'})
 
 @app.route('/user')
 def user_dashboard():
